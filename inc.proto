@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package inc.core;
+
+option go_package = "github.com/inc-lang/inc-protocol/gen/go;inccore";
+
+service Bridge {
+  rpc CallStateless (ExecutionRequest) returns (ExecutionResponse);
+  rpc CallStateful (stream ExecutionRequest) returns (stream ExecutionResponse);
+}
+
+message ExecutionRequest {
+  string request_id = 1;              // Request UUID
+  string code = 2;                    // Code Block
+  map<string, Variable> variables = 3;// Variables (args)
+  map<string, string> config = 4;     // Example: {"memory_limit": "128M"}
+}
+
+message ExecutionResponse {
+  string request_id = 1;
+  Variable result = 2;                // Result of return
+  string stdout = 3;                  // Output of print/echo
+  string stderr = 4;                  // Errors
+  int32 exit_code = 5;                // 0 = OK, 1 = Error
+}
+
+// Common IR (Intermediate Representation)
+message Variable {
+  oneof kind {
+    int64 int_val = 1;
+    double float_val = 2;
+    string string_val = 3;
+    bool bool_val = 4;
+    bytes binary_val = 5;
+    ListValue list_val = 6;
+    MapValue map_val = 7;
+    NullValue null_val = 8;
+  }
+}
+
+message ListValue {
+  repeated Variable values = 1;
+}
+
+message MapValue {
+  map<string, Variable> pairs = 1;
+}
+
+message NullValue {}
