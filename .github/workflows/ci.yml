@@ -16,13 +16,14 @@ jobs:
 
   buf-breaking:
     runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - run: git fetch origin master
       - uses: bufbuild/buf-setup-action@v1
-      - run: buf breaking --against '.git#branch=master'
-        if: github.event_name == 'pull_request'
+      - run: buf breaking --against '.git#branch=origin/master'
 
   go-test:
     runs-on: ubuntu-latest
